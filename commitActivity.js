@@ -71,4 +71,27 @@ const makeCommits = (startDate) => {
     commitBatch();
 };
 
-makeCommits("2024-01-01");
+// Get last commit date from git log
+const git = simpleGit();
+
+const getLastCommitDate = async () => {
+    try {
+        const log = await git.log({ maxCount: 1 });
+        if (log.latest && log.latest.message) {
+            const dateStr = log.latest.message;
+            const lastDate = moment(dateStr);
+            if (lastDate.isValid()) {
+                return lastDate.add(1, 'day').format('YYYY-MM-DD');
+            }
+        }
+    } catch (err) {
+        // Ignore error, start from beginning
+    }
+    return "2024-01-01";
+};
+
+(async () => {
+    const startDate = await getLastCommitDate();
+    console.log(`Starting from: ${startDate}`);
+    makeCommits(startDate);
+})();
