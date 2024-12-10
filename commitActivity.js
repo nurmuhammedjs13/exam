@@ -22,7 +22,7 @@ const markCommit = (x, y) => {
         simpleGit().add([path]).commit(date, { "--date": date }).push();
     });
 };
-//.
+//.ф
 const makeCommits = (n) => {
     if (n === 0) return simpleGit().push();
 
