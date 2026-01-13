@@ -41,22 +41,28 @@ const makeCommits = (startDate) => {
         }
     }
     
-    let index = 0;
-    const commitNext = () => {
-        if (index >= commits.length) {
-            return simpleGit().push();
+    console.log(`Total commits to create: ${commits.length}`);
+    
+    const git = simpleGit();
+    
+    const commitBatch = async () => {
+        for (let i = 0; i < commits.length; i++) {
+            const date = commits[i];
+            await jsonfile.writeFile(path, { date: date });
+            await git.add([path]);
+            await git.commit(date, { "--date": date });
+            
+            if ((i + 1) % 50 === 0) {
+                console.log(`Progress: ${i + 1}/${commits.length}`);
+            }
         }
         
-        const date = commits[index];
-        jsonfile.writeFile(path, { date: date }, () => {
-            simpleGit().add([path]).commit(date, { "--date": date }, () => {
-                index++;
-                commitNext();
-            });
-        });
+        console.log('Pushing to remote...');
+        await git.push();
+        console.log('Done!');
     };
     
-    commitNext();
+    commitBatch().catch(err => console.error('Error:', err));
 };
 
 makeCommits("2024-01-01");
