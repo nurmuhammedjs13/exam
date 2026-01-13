@@ -45,7 +45,6 @@ const makeCommits = (startDate) => {
     console.log(`Total commits to create: ${commits.length}`);
     
     const git = simpleGit();
-    const batchSize = 50;
     
     const commitBatch = async () => {
         try {
@@ -55,26 +54,21 @@ const makeCommits = (startDate) => {
                 await git.add([path]);
                 await git.commit(date, { "--date": date });
                 
-                if ((i + 1) % batchSize === 0) {
-                    console.log(`Progress: ${i + 1}/${commits.length} - Pushing batch...`);
-                    await git.push();
-                }
-                
-                if ((i + 1) % 10 === 0) {
-                    process.stdout.write('.');
+                if ((i + 1) % 100 === 0) {
+                    console.log(`Progress: ${i + 1}/${commits.length}`);
                 }
             }
             
-            console.log('\nFinal push...');
-            await git.push();
+            console.log('Pushing all commits...');
+            await git.push('origin', 'main', ['--force']);
             console.log('Done! Created ' + commits.length + ' commits');
         } catch (err) {
-            console.error('Error at commit:', err.message);
-            throw err;
+            console.error('Error:', err.message);
+            process.exit(1);
         }
     };
     
-    commitBatch().catch(err => console.error('Fatal error:', err));
+    commitBatch();
 };
 
 makeCommits("2024-01-01");
