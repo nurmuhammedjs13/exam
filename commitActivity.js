@@ -2,6 +2,7 @@ import jsonfile from "jsonfile";
 import moment from "moment";
 import simpleGit from "simple-git";
 import random from "random";
+import fs from "fs/promises";
 
 const path = "./data.json";
 
@@ -48,11 +49,11 @@ const makeCommits = (startDate) => {
     const commitBatch = async () => {
         for (let i = 0; i < commits.length; i++) {
             const date = commits[i];
-            await jsonfile.writeFile(path, { date: date });
+            await fs.writeFile(path, JSON.stringify({ date: date }, null, 2));
             await git.add([path]);
             await git.commit(date, { "--date": date });
             
-            if ((i + 1) % 50 === 0) {
+            if ((i + 1) % 100 === 0) {
                 console.log(`Progress: ${i + 1}/${commits.length}`);
             }
         }
